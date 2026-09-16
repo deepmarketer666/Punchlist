@@ -1,0 +1,33 @@
+# Render Blueprint - https://render.com/docs/blueprint-spec
+# Creates the web service and a Postgres database, and wires them together.
+# Deploy: Render Dashboard > New > Blueprint > pick this repo.
+# Python version comes from .python-version (3.12).
+
+services:
+  - type: web
+    name: punchlist
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app      # settings in gunicorn.conf.py
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true              # Render creates a random secret once and keeps it
+      - key: SEED_DEMO
+        value: "true"                    # set to "false" to skip the demo account
+      - key: WEB_CONCURRENCY
+        value: "2"                       # Gunicorn workers (only used when a database is attached)
+      - key: DATABASE_URL
+        fromDatabase:
+          name: punchlist-db
+          property: connectionString     # internal URL - no SSL needed
+
+databases:
+  - name: punchlist-db
+    plan: free
+    databaseName: punchlist
+    user: punchlist
+    ipAllowList: []                      # only services inside your Render workspace can connect

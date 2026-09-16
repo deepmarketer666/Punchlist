@@ -1,0 +1,6 @@
+# Runtime dependencies (installed by Render)
+Flask==3.1.3
+gunicorn==23.0.0
+psycopg[binary]==3.2.13
+psycopg-pool==3.3.1
+PyJWT==2.10.1
